@@ -8,6 +8,7 @@ from abstract_client import AbstractInteractionClient
 
 class YandexPay(AbstractInteractionClient):
     def get_access_token(self):
+        # ToDo реализовать получение токена из YandexPay
         pass
 
 
@@ -29,7 +30,7 @@ class AuthenticationPay(AbstractInteractionClient):
         self.merchant_id = merchant_id
 
     def _auth_make(self, request_id: str = None):
-        # ToDo реализовать
+        # ToDo реализовать аутентификацию в CLOUD_PAYMENTS
         auth = HTTPBasicAuth(self.public_id, self.api_secret)
 
         # headers = {'Authorization': }
@@ -45,6 +46,7 @@ class AuthenticationPay(AbstractInteractionClient):
             currency: str = 'RUB',
             **kwargs: Any
     ):
+        # ToDo добавить обработку ответов от сервера (в случае если успешный, ошибка или оплата через Secure3d)
         params = {
             "ip_address": ip_address,
             "amount": amount,
@@ -56,15 +58,3 @@ class AuthenticationPay(AbstractInteractionClient):
 
         response = await self.post('POST', charge_url, )
         await self.close()
-
-        # if response['Success']:
-        #     return Transaction.from_dict(response['Model'])
-        # if response['Message']:
-        #     raise CloudPaymentsError(response)
-        # if 'ReasonCode' in response['Model']:
-        #     raise PaymentError(response)
-        # return Secure3d.from_dict(response['Model'])
-
-
-auth = HTTPBasicAuth('fake@example.com', 'password')
-print(auth())
