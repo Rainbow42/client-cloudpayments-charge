@@ -4,6 +4,7 @@ from functools import partial
 
 
 class CamelCasedSchema(Schema):
+    """"""
     _snake_case = re.compile(r"(?<=\w)_(\w)")
     _to_camel_case = partial(_snake_case.sub, lambda m: m[1].upper())
 

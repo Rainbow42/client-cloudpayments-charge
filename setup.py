@@ -1,7 +1,4 @@
-import re
-import sys
 from setuptools import setup
-from io import open
 
 VERSION = '0.0.1'
 
