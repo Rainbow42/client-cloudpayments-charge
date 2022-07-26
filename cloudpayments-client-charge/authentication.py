@@ -10,7 +10,7 @@ class AuthenticationHTTP:
             return str_
         return str_.decode(encoding)
 
-    def __call__(self, username: str, password: str):
+    def __call__(self, username: str, password: str) -> str:
         if isinstance(username, str):
             username = username.encode("latin1")
 

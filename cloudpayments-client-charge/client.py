@@ -52,8 +52,10 @@ class AuthenticationPay(AbstractInteractionClient):
             "card_cryptogram_packet": card_cryptogram_packet,
             "currency": currency
         }
-        charge_pay = self.charge_pay_schema.load(params.update(kwargs))
+        body_charge_pay = self.charge_pay_schema.load(params.update(kwargs))
         charge_url = self.endpoint_url(PaymentCryptogramApi.charge_pay)
+        headers = self._auth_make()
 
-        response = await self.post('POST', charge_url, )
+        response = await self.post(body_charge_pay, charge_url, headers)
         await self.close()
+        return response
