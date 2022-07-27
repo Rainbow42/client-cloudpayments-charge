@@ -72,6 +72,7 @@ class ProcessPay(AbstractInteractionClient):
             "currency": currency
         }
         body_charge_pay = {"json": self.charge_pay_schema.dump(params)}
+        print(body_charge_pay)
         charge_url = self.endpoint_url(PaymentCryptogramApi.charge_pay)
 
         headers = self._auth_make_headers(headers=self._headers_make())

@@ -4,19 +4,22 @@ from functools import partial
 from marshmallow import Schema, fields
 
 
-class CamelCasedSchema(Schema):
+class PascalCasedSchema(Schema):
     """
-    CloudPayment принимает ключи в теле запроса в стиле CamelCase,
+    CloudPayment принимает ключи в теле запроса в стиле PascalCase,
     поэтому наименование полей переводим в требуемый стиль
     """
-    _snake_case = re.compile(r"(?<=\w)_(\w)")
-    _to_camel_case = partial(_snake_case.sub, lambda m: m[1].upper())
 
-    def on_bind_field(self, field_name, field_obj, _cc=_to_camel_case):
-        field_obj.data_key = _cc(field_name.lower())
+    def on_bind_field(self, field_name, field_obj):
+        field_names = field_name.split('_')
+        field = str()
+        for name in field_names:
+            chr_ = name[0].upper() + name[1:]
+            field += chr_
+        field_obj.data_key = field
 
 
-class ChargePaySchema(CamelCasedSchema):
+class ChargePaySchema(PascalCasedSchema):
     amount = fields.Float(required=True)
     currency = fields.Str(required=False)
     description = fields.Str(required=False)
