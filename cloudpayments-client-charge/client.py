@@ -12,8 +12,8 @@ class YandexPay(AbstractInteractionClient):
         pass
 
 
-class AuthenticationPay(AbstractInteractionClient):
-    """Аутентификация платежей"""
+class ProcessPay(AbstractInteractionClient):
+    """Проведение платежей"""
     charge_pay_schema = ChargePaySchema()
     base_auth = AuthenticationHTTP()
 
@@ -21,12 +21,11 @@ class AuthenticationPay(AbstractInteractionClient):
 
     def __init__(self, public_id: str, api_secret: str, merchant_id: str = None):
         """
-            :param public_id: выдается в личном кабинете платежной системы (используется как логин для аутентификации)
-            :param api_secret: выдается в личном кабинете платежной системы (используется как пароль для аутентификации)
-            :param merchant_id: выдается Yandex Pay
+        :param public_id: выдается в личном кабинете платежной системы (используется как логин для аутентификации)
+        :param api_secret: выдается в личном кабинете платежной системы (используется как пароль для аутентификации)
+        :param merchant_id: выдается Yandex Pay
         """
         super().__init__()
-
         self.public_id = public_id
         self.api_secret = api_secret
         self.merchant_id = merchant_id
@@ -38,13 +37,14 @@ class AuthenticationPay(AbstractInteractionClient):
         return headers
 
     async def charge_pay(
-            self,
-            ip_address: str,
-            amount: float,
-            card_cryptogram_packet: str,
-            currency: str = 'RUB',
-            **kwargs: Any
+        self,
+        ip_address: str,
+        amount: float,
+        card_cryptogram_packet: str,
+        currency: str = 'RUB',
+        **kwargs: Any
     ):
+        """Проведение одностадийного платежа(charge)"""
         # ToDo добавить обработку ответов от сервера (в случае если успешный, ошибка или оплата через Secure3d)
         params = {
             "ip_address": ip_address,
