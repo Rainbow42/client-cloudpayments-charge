@@ -25,14 +25,14 @@ setup(
         'requests (>=2.28.1)',
         'marshmallow (>=3.17.0)',
         'aiohttp (>=3.8.1)',
-        'marshmallow-dataclass (>=8.5.8)'
+        'parameterized (>=0.8.1)'
     ],
 
     install_requires=[
         'requests (>=2.28.1)',
         'marshmallow (>=3.17.0)',
         'aiohttp (>=3.8.1)',
-        'marshmallow-dataclass (>=8.5.8)'
+        'parameterized (>=0.8.1)'
     ],
 
     classifiers=[

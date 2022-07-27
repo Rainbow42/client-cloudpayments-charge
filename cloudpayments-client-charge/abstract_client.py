@@ -3,6 +3,7 @@ import random
 import time
 from itertools import chain
 from typing import Any, ClassVar, Dict, Optional, Type
+
 from aiohttp import ClientResponse, ClientSession, ClientTimeout, TCPConnector
 
 
@@ -73,7 +74,7 @@ class AbstractInteractionClient:
         if self.REQUEST_TIMEOUT:
             self.default_timeout = ClientTimeout(total=self.REQUEST_TIMEOUT, connect=self.CONNECT_TIMEOUT)
 
-    def _get_session_cls(self) -> Type[ClientSession]:
+    async def _get_session_cls(self) -> Type[ClientSession]:
         return ClientSession
 
     def _get_session_kwargs(self) -> Dict[str, Any]:
@@ -88,13 +89,13 @@ class AbstractInteractionClient:
         return kwargs
 
     @property
-    def session(self) -> ClientSession:
+    async def session(self) -> ClientSession:
         if self._session is None:
-            self._session = self.create_session()
+            self._session = await self.create_session()
         return self._session
 
-    def create_session(self) -> ClientSession:
-        session_cls = self._get_session_cls()
+    async def create_session(self) -> ClientSession:
+        session_cls = await self._get_session_cls()
         kwargs = self._get_session_kwargs()
         return session_cls(**kwargs)
 
@@ -133,8 +134,10 @@ class AbstractInteractionClient:
             response = None
             before = time.monotonic()
             try:
-                response = await self.session.request(method, url, **kwargs)
+                session = await self.session
+                response = session.request(method, url, **kwargs)
 
+                await session.close()
                 assert response is not None
                 success = True
             except Exception as e:

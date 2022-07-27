@@ -1,12 +1,13 @@
-from marshmallow import Schema, fields, INCLUDE, ValidationError
 import re
 from functools import partial
+
+from marshmallow import Schema, fields
 
 
 class CamelCasedSchema(Schema):
     """
     CloudPayment принимает ключи в теле запроса в стиле CamelCase,
-    поэтому наименование полей переводим в требуемый стиль.
+    поэтому наименование полей переводим в требуемый стиль
     """
     _snake_case = re.compile(r"(?<=\w)_(\w)")
     _to_camel_case = partial(_snake_case.sub, lambda m: m[1].upper())
@@ -34,7 +35,3 @@ class ChargePaySchema(CamelCasedSchema):
         required=False,
         data_key="JsonData",
     )
-
-    # class Meta:
-    #     # Include unknown fields in the deserialized output
-    #     unknown = INCLUDE

@@ -1,15 +1,17 @@
+import base64
 from typing import Any
-from schemas import ChargePaySchema
-from urls import PaymentCryptogramApi, CLOUD_PAYMENTS
-from authentication import AuthenticationHTTP
 
 from abstract_client import AbstractInteractionClient
+from aiohttp import TCPConnector
+from authentication import AuthenticationHTTP
+from schemas import ChargePaySchema
+from urls import CLOUD_PAYMENTS, PaymentCryptogramApi
 
 
-class YandexPay(AbstractInteractionClient):
-    def get_access_token(self):
-        # ToDo реализовать получение токена из YandexPay
-        pass
+class PaymentsError(Exception):
+    def __init__(self, response):
+        self.response = response
+        super().__init__(response.get('Message'))
 
 
 class ProcessPay(AbstractInteractionClient):
@@ -18,22 +20,34 @@ class ProcessPay(AbstractInteractionClient):
     base_auth = AuthenticationHTTP()
 
     BASE_URL = CLOUD_PAYMENTS
+    SERVICE = 'CLOUD_PAYMENTS'
+    CONNECTOR = TCPConnector(verify_ssl=False)
 
-    def __init__(self, public_id: str, api_secret: str, merchant_id: str = None):
+    def __init__(self, public_id: str, api_secret: str):
         """
         :param public_id: выдается в личном кабинете платежной системы (используется как логин для аутентификации)
         :param api_secret: выдается в личном кабинете платежной системы (используется как пароль для аутентификации)
-        :param merchant_id: выдается Yandex Pay
         """
         super().__init__()
         self.public_id = public_id
         self.api_secret = api_secret
-        self.merchant_id = merchant_id
 
-    def _auth_make(self, request_id: str = None) -> dict:
-        headers = {'Authorization': self.base_auth(self.public_id, self.api_secret)}
+    def _auth_make_headers(self, request_id: str = None, headers: dict = None) -> dict:
+        """Добавление в заголовок стандартной аутентификации HTTP Basic Auth"""
+        if headers is None:
+            headers = dict(headers={})
+
+        headers["headers"].update({'Authorization-Type': self.base_auth(self.public_id, self.api_secret)})
         if request_id is not None:
             headers['X-Request-ID'] = request_id
+
+        return headers
+
+    @staticmethod
+    def _headers_make(headers: dict = None) -> dict:
+        if headers is None:
+            headers = dict(headers={})
+        headers["headers"].update({'Content-Type': 'application/json'})
         return headers
 
     async def charge_pay(
@@ -44,18 +58,37 @@ class ProcessPay(AbstractInteractionClient):
         currency: str = 'RUB',
         **kwargs: Any
     ):
-        """Проведение одностадийного платежа(charge)"""
+        """Проведение одностадийного платежа(charge) c использованием токена YandexPay
+        :param currency:  необязательный параметр -  Валюта
+        :param ip_address: обязательный параметр -  IP-адрес плательщика
+        :param amount: обязательный параметр -  Сумма платежа
+        :param card_cryptogram_packet: Сервис Yandex Pay создает платежный токен
+        """
         # ToDo добавить обработку ответов от сервера (в случае если успешный, ошибка или оплата через Secure3d)
         params = {
             "ip_address": ip_address,
             "amount": amount,
-            "card_cryptogram_packet": card_cryptogram_packet,
+            "card_cryptogram_packet": base64.b64decode(card_cryptogram_packet),
             "currency": currency
         }
-        body_charge_pay = self.charge_pay_schema.load(params.update(kwargs))
+        body_charge_pay = {"json": self.charge_pay_schema.dump(params)}
         charge_url = self.endpoint_url(PaymentCryptogramApi.charge_pay)
-        headers = self._auth_make()
 
-        response = await self.post(body_charge_pay, charge_url, headers)
+        headers = self._auth_make_headers(headers=self._headers_make())
+
+        data = {**body_charge_pay, **headers}
+        response = await self.post("POST", charge_url, **data)
+
         await self.close()
-        return response
+        if response.get('Success') and response.get('Model', {}).get("ReasonCode") == 0:
+            #   транзакция принята
+            return response
+        if response.get('Success') is False and response['Message'] and response.get('Model'):
+            # требуется 3-D Secure аутентификация
+            return response
+        if response.get('Model', {}).get("ReasonCode", {}) != 0:
+            #  транзакция отклонена
+            raise PaymentsError(response)
+        if response.get('Message') is None:
+            #  транзакция отклонена
+            raise PaymentsError(response)
