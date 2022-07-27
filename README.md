@@ -17,5 +17,5 @@ Python клиент для платежного сервиса CloudPayments, р
 
 `card_cryptogram_packet`: обязательный параметр - Сервис Yandex Pay создает платежный токен плательщика, этот токен декодируются из base64 и отправляться в `CardCryptogramPacket`
 
-- Реализована аутентификация `HTTP Basic Auth` для запросов к CloudPayments в `AuthenticationHTTP` 
+- Реализована аутентификация `HTTP Basic Auth` для запросов к CloudPayments в классе `AuthenticationHTTP` 
 - Реализованы юнит-тесты 
