@@ -33,7 +33,8 @@ Python клиент для платежного сервиса CloudPayments, р
 }
 ```
 
-json - аргумент метода aiohttp, который добавляет данные в body 
-headers  - аргумент метода aiohttp, который добавляет данные в HTTP Headers  
+`json` - аргумент метода aiohttp, который добавляет данные в body 
+
+`headers`  - аргумент метода aiohttp, который добавляет данные в HTTP Headers  
 - Реализована аутентификация `HTTP Basic Auth` для запросов к CloudPayments в классе `AuthenticationHTTP` 
 - Реализованы юнит-тесты 
