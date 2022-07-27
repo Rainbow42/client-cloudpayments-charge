@@ -64,7 +64,6 @@ class ProcessPay(AbstractInteractionClient):
         :param amount: обязательный параметр -  Сумма платежа
         :param card_cryptogram_packet: обязательный параметр - Сервис Yandex Pay создает платежный токен
         """
-        # ToDo добавить обработку ответов от сервера (в случае если успешный, ошибка или оплата через Secure3d)
         params = {
             "ip_address": ip_address,
             "amount": amount,
@@ -72,7 +71,6 @@ class ProcessPay(AbstractInteractionClient):
             "currency": currency
         }
         body_charge_pay = {"json": self.charge_pay_schema.dump(params)}
-        print(body_charge_pay)
         charge_url = self.endpoint_url(PaymentCryptogramApi.charge_pay)
 
         headers = self._auth_make_headers(headers=self._headers_make())
