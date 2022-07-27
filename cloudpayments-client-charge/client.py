@@ -62,7 +62,7 @@ class ProcessPay(AbstractInteractionClient):
         :param currency:  необязательный параметр -  Валюта
         :param ip_address: обязательный параметр -  IP-адрес плательщика
         :param amount: обязательный параметр -  Сумма платежа
-        :param card_cryptogram_packet: Сервис Yandex Pay создает платежный токен
+        :param card_cryptogram_packet: обязательный параметр - Сервис Yandex Pay создает платежный токен
         """
         # ToDo добавить обработку ответов от сервера (в случае если успешный, ошибка или оплата через Secure3d)
         params = {
